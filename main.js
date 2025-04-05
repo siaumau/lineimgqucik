@@ -727,7 +727,7 @@ function showStatus(message, type) {
 }
 
 // 調整圖片大小
-async function resizeImage(dataUrl, option, maxWidth, maxHeight) {
+async function resizeImage(dataUrl, option = 'max', maxWidth = 240, maxHeight = 240) {
     return new Promise((resolve) => {
         const img = new Image();
         img.onload = () => {
@@ -768,17 +768,14 @@ async function resizeImage(dataUrl, option, maxWidth, maxHeight) {
                 // 繪製圖片
                 ctx.drawImage(img, dx, dy, dWidth, dHeight);
             } else {
-                // 依設定調整大小
-                const resizeOption = document.getElementById('resizeOption').value;
-                const maxSize = parseInt(document.getElementById('maxSize').value);
-
                 // 依最大尺寸調整
-                if (resizeOption === 'width' || (resizeOption === 'max' && width > maxSize)) {
+                const maxSize = Math.max(maxWidth, maxHeight);
+                if (width > maxSize) {
                     height = Math.floor((height * maxSize) / width);
                     width = maxSize;
                 }
 
-                if (resizeOption === 'height' || (resizeOption === 'max' && height > maxSize)) {
+                if (height > maxSize) {
                     width = Math.floor((width * maxSize) / height);
                     height = maxSize;
                 }
