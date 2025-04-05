@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>LINE貼圖製作工具</title>
+        <link rel="stylesheet" href="main.css">
+    </head>
+    <body>
+        <div class="app-container">
+            <header>
+                <h1>LINE貼圖製作工具</h1>
+            </header>
+
+            <main>
+                <div class="image-grid-container">
+                    <div class="grid-controls">
+                        <button id="addImagesBtn" class="btn primary">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2"
+                                    ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                            選擇圖片
+                        </button>
+                        <input type="file" id="fileInput" multiple
+                            accept="image/*" style="display: none;">
+
+                        <button id="settingsBtn" class="btn secondary">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path
+                                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            </svg>
+                            設定
+                        </button>
+
+                        <button id="processBtn" class="btn accent" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            產生貼圖
+                        </button>
+                    </div>
+
+                    <div class="image-grid" id="imageGrid">
+                        <div class="special-cell main-cell" data-type="main">
+                            <div class="cell-inner dropzone" data-type="main">
+                                <div class="cell-label">主圖片</div>
+                                <div class="dimensions">240 × 240</div>
+                                <div class="placeholder-content">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18"
+                                            rx="2" ry="2"></rect>
+                                        <circle cx="8.5" cy="8.5"
+                                            r="1.5"></circle>
+                                        <polyline
+                                            points="21 15 16 10 5 21"></polyline>
+                                    </svg>
+                                    <span>拖放至此</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="special-cell tab-cell" data-type="tab">
+                            <div class="cell-inner dropzone" data-type="tab">
+                                <div class="cell-label">標籤圖片</div>
+                                <div class="dimensions">96 × 74</div>
+                                <div class="placeholder-content">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18"
+                                            rx="2" ry="2"></rect>
+                                        <circle cx="8.5" cy="8.5"
+                                            r="1.5"></circle>
+                                        <polyline
+                                            points="21 15 16 10 5 21"></polyline>
+                                    </svg>
+                                    <span>拖放至此</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 一般貼圖格子會在JavaScript動態生成 -->
+                    </div>
+                </div>
+            </main>
+
+            <!-- 設定面板 (預設隱藏) -->
+            <div class="settings-panel" id="settingsPanel">
+                <div class="settings-header">
+                    <h2>設定</h2>
+                    <button id="closeSettingsBtn" class="btn-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="settings-content">
+                    <div class="setting-group">
+                        <h3>貼圖數量</h3>
+                        <div class="form-group">
+                            <label for="gridSizeSelector">貼圖格子數量：</label>
+                            <select id="gridSizeSelector">
+                                <option value="8">8 張</option>
+                                <option value="16" selected>16 張</option>
+                                <option value="24">24 張</option>
+                                <option value="32">32 張</option>
+                                <option value="40">40 張</option>
+                            </select>
+                        </div>
+                        <div class="form-info">* 變更數量會重新分配現有圖片</div>
+                    </div>
+                    <div class="setting-group">
+                        <h3>預設值資訊</h3>
+                        <ul class="info-list">
+                            <li>主圖片尺寸：240 × 240 像素</li>
+                            <li>標籤圖片尺寸：96 × 74 像素</li>
+                            <li>貼圖數量標準：8, 16, 24, 32 或 40 張</li>
+                            <li>所有圖片將保持原始比例</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overlay" id="overlay"></div>
+
+            <!-- 狀態提示 -->
+            <div id="status" class="status"></div>
+        </div>
+
+        <!-- 互換確認對話框 -->
+        <div id="swapConfirmDialog" class="dialog">
+            <div class="dialog-content">
+                <div class="dialog-header">
+                    <h3>確認互換圖片</h3>
+                    <button class="close-btn"
+                        onclick="closeSwapDialog()">&times;</button>
+                </div>
+                <div class="dialog-body">
+                    <div class="swap-preview">
+                        <div class="swap-item">
+                            <p>原位置</p>
+                            <div class="preview-img-container">
+                                <img id="sourcePreview" src alt="源圖片">
+                                <div class="position-label"
+                                    id="sourcePosition"></div>
+                            </div>
+                        </div>
+                        <div class="swap-arrows">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M7 10l5 5 5-5" />
+                                <path d="M17 14l-5-5-5 5" />
+                            </svg>
+                        </div>
+                        <div class="swap-item">
+                            <p>新位置</p>
+                            <div class="preview-img-container">
+                                <img id="targetPreview" src alt="目標圖片">
+                                <div class="position-label"
+                                    id="targetPosition"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="swap-description">確定要交換這兩張圖片的位置嗎？</p>
+                </div>
+                <div class="dialog-footer">
+                    <button id="cancelSwapBtn" class="btn btn-secondary"
+                        onclick="closeSwapDialog()">取消</button>
+                    <button id="confirmSwapBtn"
+                        class="btn btn-primary">確認互換</button>
+                </div>
+            </div>
+        </div>
+        <script src="main.js"></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/interact.js/1.10.11/interact.min.js"></script>
+
+    </body>
+</html>
