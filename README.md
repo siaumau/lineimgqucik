@@ -13,8 +13,12 @@ A user-friendly web application that helps you quickly create sticker packs that
 Intuitive interface design for easy sticker management and editing.
 
 ### 快速拖曳功能 / Quick Drag-and-Drop
-![快速拖曳功能展示](@01.gif)
+![快速拖曳功能展示](https://github.com/siaumau/lineimgqucik/blob/main/01.png)
 支援直覺的拖放操作，快速調整貼圖位置和順序。
+
+## 操作動態演示
+
+![操作動態演示](https://github.com/siaumau/lineimgqucik/raw/main/01.gif)
 
 Supports intuitive drag-and-drop operations for quick position and order adjustment.
 
