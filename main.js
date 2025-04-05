@@ -862,207 +862,6 @@ function showStatus(message, type) {
     }, 3000);
 }
 
-// 調整圖片大小
-async function resizeImage(dataUrl, option = 'max') {
-    return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-            let width = img.width;
-            let height = img.height;
-            let dx = 0;
-            let dy = 0;
-            let dWidth, dHeight;
-
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-
-            if (option === 'main') {
-                // 使用主圖片尺寸設定 (240x240)
-                const { width: maxWidth, height: maxHeight } = window.mainImageSize;
-                canvas.width = maxWidth;
-                canvas.height = maxHeight;
-                ctx.clearRect(0, 0, maxWidth, maxHeight);
-
-                const scale = Math.min(maxWidth / width, maxHeight / height);
-                dWidth = Math.floor(width * scale);
-                dHeight = Math.floor(height * scale);
-
-                dWidth = dWidth % 2 !== 0 ? dWidth - 1 : dWidth;
-                dHeight = dHeight % 2 !== 0 ? dHeight - 1 : dHeight;
-
-                dx = Math.floor((maxWidth - dWidth) / 2);
-                dy = Math.floor((maxHeight - dHeight) / 2);
-
-                ctx.drawImage(img, dx, dy, dWidth, dHeight);
-            } else if (option === 'tab') {
-                // 標籤圖片固定尺寸 (96x74)
-                const tabWidth = 96;
-                const tabHeight = 74;
-                canvas.width = tabWidth;
-                canvas.height = tabHeight;
-                ctx.clearRect(0, 0, tabWidth, tabHeight);
-
-                const scale = Math.min(tabWidth / width, tabHeight / height);
-                dWidth = Math.floor(width * scale);
-                dHeight = Math.floor(height * scale);
-
-                dWidth = dWidth % 2 !== 0 ? dWidth - 1 : dWidth;
-                dHeight = dHeight % 2 !== 0 ? dHeight - 1 : dHeight;
-
-                dx = Math.floor((tabWidth - dWidth) / 2);
-                dy = Math.floor((tabHeight - dHeight) / 2);
-
-                ctx.drawImage(img, dx, dy, dWidth, dHeight);
-            } else {
-                // 使用最大圖片尺寸設定
-                const { width: maxWidth, height: maxHeight } = window.maxImageSize;
-                if (width > maxWidth) {
-                    height = Math.floor((height * maxWidth) / width);
-                    width = maxWidth;
-                }
-
-                if (height > maxHeight) {
-                    width = Math.floor((width * maxHeight) / height);
-                    height = maxHeight;
-                }
-
-                width = width % 2 !== 0 ? width - 1 : width;
-                height = height % 2 !== 0 ? height - 1 : height;
-
-                canvas.width = width;
-                canvas.height = height;
-                ctx.drawImage(img, 0, 0, width, height);
-            }
-
-            canvas.toBlob((blob) => {
-                resolve(blob);
-            }, 'image/png');
-        };
-
-        img.src = dataUrl;
-    });
-}
-
-// 處理圖片並生成 ZIP
-async function processImages() {
-    // 檢查主圖片和標籤圖片
-    if (mainImageIndex === -1 || tabImageIndex === -1) {
-        showStatus('請先選擇主圖片和標籤圖片', 'error');
-        return;
-    }
-
-    // 檢查 LINE 貼圖數量規範 (不含 main 和 tab)
-    const regularImages = imageFiles.filter(img => img.type === 'regular');
-    const regularCount = regularImages.length;
-
-    if (!LINE_STICKER_COUNTS.includes(regularCount)) {
-        const proceed = confirm(
-            `LINE 貼圖數量應為 ${LINE_STICKER_COUNTS.join('、')} 張（不含主圖和標籤圖）。\n` +
-            `您目前有 ${regularCount} 張貼圖（不含主圖和標籤圖）。\n` +
-            `是否仍要繼續處理？`
-        );
-
-        if (!proceed) {
-            return;
-        }
-    }
-
-    // 更新按鈕為處理中狀態
-    processBtn.disabled = true;
-    processBtn.innerHTML = '<span class="processing-indicator"></span>處理中...';
-
-    try {
-        showStatus('正在處理圖片...', 'info');
-
-        // 創建 ZIP 檔案
-        const zip = new JSZip();
-
-        // 處理主圖片 (240x240)
-        const mainImg = await resizeImage(
-            imageFiles[mainImageIndex].dataUrl,
-            'main'  // 使用 'main' 選項，會自動使用 mainImageSize 設定
-        );
-        zip.file('main.png', mainImg);
-
-        // 處理標籤圖片 (96x74)
-        const tabImg = await resizeImage(
-            imageFiles[tabImageIndex].dataUrl,
-            'tab'  // 新增 'tab' 選項處理
-        );
-        zip.file('tab.png', tabImg);
-
-        // 排序一般貼圖
-        const sortedRegularImages = [...regularImages].sort((a, b) => a.cellIndex - b.cellIndex);
-
-        // 處理一般貼圖
-        for (let i = 0; i < sortedRegularImages.length; i++) {
-            const img = sortedRegularImages[i];
-            const filename = String(i + 1).padStart(2, '0') + '.png';
-
-            // 調整圖片大小
-            const resizedImg = await resizeImage(img.dataUrl, 'max');
-
-            // 添加到 ZIP
-            zip.file(filename, resizedImg);
-
-            // 更新狀態
-            showStatus(`處理圖片 ${i + 1}/${sortedRegularImages.length}...`, 'info');
-        }
-
-        // 生成並下載 ZIP
-        const zipBlob = await zip.generateAsync({
-            type: 'blob',
-            compression: 'DEFLATE',
-            compressionOptions: {
-                level: 9
-            }
-        });
-
-        // 創建下載連結
-        const url = URL.createObjectURL(zipBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'line_stickers.zip';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        showStatus('貼圖包已成功產生並下載！', 'success');
-    } catch (error) {
-        console.error('處理圖片時發生錯誤:', error);
-        showStatus('處理圖片時發生錯誤: ' + error.message, 'error');
-    } finally {
-        // 恢復按鈕狀態
-        processBtn.disabled = false;
-        processBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            產生貼圖
-        `;
-    }
-}
-
-// 更新主圖片
-async function updateMainImage(file) {
-    try {
-        const dataUrl = await readFileAsDataURL(file);
-        const resizedBlob = await resizeImage(dataUrl, 'main');
-        const resizedDataUrl = await blobToDataURL(resizedBlob);
-
-        const mainCell = document.querySelector('.cell[data-type="main"]');
-        if (mainCell) {
-            updateCellImage('main', 0, resizedDataUrl);
-            window.mainImage = resizedDataUrl;
-        }
-    } catch (error) {
-        console.error('更新主圖片時發生錯誤：', error);
-    }
-}
-
 // 輔助函數：從 Blob 建立圖片
 async function createImageFromBlob(blob) {
     return new Promise((resolve, reject) => {
@@ -1074,27 +873,152 @@ async function createImageFromBlob(blob) {
 }
 
 // 輔助函數：調整圖片大小
-async function resizeImage(img, targetWidth, targetHeight) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+async function resizeImage(imgElement, targetWidth, targetHeight) {
+    return new Promise((resolve, reject) => {
+        try {
+            // 確保輸入是 HTMLImageElement
+            if (!(imgElement instanceof HTMLImageElement)) {
+                throw new Error('輸入必須是 HTMLImageElement');
+            }
 
-    // 計算縮放比例
-    const scale = Math.min(targetWidth / img.width, targetHeight / img.height);
-    const width = img.width * scale;
-    const height = img.height * scale;
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
 
-    // 設定 canvas 大小
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
+            // 計算縮放比例
+            const scale = Math.min(targetWidth / imgElement.width, targetHeight / imgElement.height);
+            const width = imgElement.width * scale;
+            const height = imgElement.height * scale;
 
-    // 清空 canvas
-    ctx.clearRect(0, 0, targetWidth, targetHeight);
+            // 設定 canvas 大小
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
 
-    // 在中心繪製圖片
-    const x = (targetWidth - width) / 2;
-    const y = (targetHeight - height) / 2;
-    ctx.drawImage(img, x, y, width, height);
+            // 清空 canvas
+            ctx.clearRect(0, 0, targetWidth, targetHeight);
 
-    // 轉換為 PNG 格式
-    return canvas.toDataURL('image/png');
+            // 在中心繪製圖片
+            const x = (targetWidth - width) / 2;
+            const y = (targetHeight - height) / 2;
+
+            // 確保圖片已經完全載入
+            if (imgElement.complete) {
+                ctx.drawImage(imgElement, x, y, width, height);
+                resolve(canvas.toDataURL('image/png'));
+            } else {
+                imgElement.onload = () => {
+                    ctx.drawImage(imgElement, x, y, width, height);
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                imgElement.onerror = () => {
+                    reject(new Error('圖片載入失敗'));
+                };
+            }
+        } catch (error) {
+            console.error('調整圖片大小時發生錯誤:', error);
+            reject(error);
+        }
+    });
+}
+
+// 處理圖片並生成 ZIP
+async function processImages() {
+    try {
+        showStatus('正在處理圖片...', 'info');
+
+        // 創建 ZIP 檔案
+        const zip = new JSZip();
+
+        // 處理主圖片
+        const mainCell = document.querySelector('.cell-inner[data-type="main"] img');
+        if (!mainCell) {
+            throw new Error('請先設定主圖片');
+        }
+
+        // 處理標籤圖片
+        const tabCell = document.querySelector('.cell-inner[data-type="tab"] img');
+        if (!tabCell) {
+            throw new Error('請先設定標籤圖片');
+        }
+
+        try {
+            // 調整並添加主圖片
+            const mainImg = new Image();
+            mainImg.src = mainCell.src;
+            await new Promise((resolve) => { mainImg.onload = resolve; });
+            const resizedMainImage = await resizeImage(mainImg, 240, 240);
+            const mainBlob = await fetch(resizedMainImage).then(r => r.blob());
+            zip.file('main.png', mainBlob);
+
+            // 調整並添加標籤圖片
+            const tabImg = new Image();
+            tabImg.src = tabCell.src;
+            await new Promise((resolve) => { tabImg.onload = resolve; });
+            const resizedTabImage = await resizeImage(tabImg, 96, 74);
+            const tabBlob = await fetch(resizedTabImage).then(r => r.blob());
+            zip.file('tab.png', tabBlob);
+
+            // 處理一般貼圖
+            const gridCells = document.querySelectorAll('.grid-cell:not(.special-cell) .cell-inner');
+            let stickerIndex = 1;
+
+            // 遍歷所有一般貼圖單元格
+            for (const cell of gridCells) {
+                const img = cell.querySelector('img');
+                if (img && img.src) {
+                    try {
+                        // 創建新的圖片物件
+                        const stickerImg = new Image();
+                        stickerImg.src = img.src;
+                        await new Promise((resolve) => { stickerImg.onload = resolve; });
+
+                        // 調整大小
+                        const resizedImage = await resizeImage(stickerImg, 240, 240);
+                        const blob = await fetch(resizedImage).then(r => r.blob());
+
+                        // 使用從 01 開始的編號
+                        const stickerNumber = String(stickerIndex).padStart(2, '0');
+                        zip.file(`${stickerNumber}.png`, blob);
+
+                        showStatus(`處理貼圖 ${stickerNumber}...`, 'info');
+                        stickerIndex++;
+                    } catch (error) {
+                        console.error(`處理貼圖 ${stickerIndex} 時發生錯誤:`, error);
+                        continue;
+                    }
+                }
+            }
+
+            if (stickerIndex === 1) {
+                throw new Error('沒有找到任何一般貼圖');
+            }
+
+            // 生成並下載 ZIP
+            showStatus('正在生成壓縮檔...', 'info');
+            const content = await zip.generateAsync({
+                type: 'blob',
+                compression: 'DEFLATE',
+                compressionOptions: {
+                    level: 9
+                }
+            });
+
+            // 下載檔案
+            const url = URL.createObjectURL(content);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'line_stickers.zip';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showStatus('貼圖包已成功產生並下載！', 'success');
+        } catch (error) {
+            console.error('處理圖片時發生錯誤:', error);
+            showStatus('處理圖片時發生錯誤: ' + error.message, 'error');
+        }
+    } catch (error) {
+        console.error('生成貼圖包時發生錯誤:', error);
+        showStatus(error.message, 'error');
+    }
 }
