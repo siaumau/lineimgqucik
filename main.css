@@ -650,16 +650,28 @@ input:focus, select:focus {
 }
 
 .info-card {
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    overflow: hidden;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
 }
 
-.info-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+.info-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.2em;
+    color: #333;
+}
+
+/* 移除圖片規格卡片的藍色背景 */
+.info-card[data-type="specs"] {
+    background: #fff;
+}
+
+/* 新增的兩個功能項目使用藍色字體 */
+.tool-features li:nth-last-child(2),
+.tool-features li:nth-last-child(1) {
+    color: #007bff;
 }
 
 .card-header {
@@ -738,7 +750,7 @@ input:focus, select:focus {
 }
 
 .spec-value {
-    color: #4a90e2;
+    color: #666;
     font-weight: 600;
 }
 

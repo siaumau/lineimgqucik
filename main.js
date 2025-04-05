@@ -5,15 +5,18 @@ let tabImageIndex = -1;
 const gridCells = [];
 
 // DOM 元素
-const fileInput = document.getElementById('fileInput');
-const imageGrid = document.getElementById('imageGrid');
-const addImagesBtn = document.getElementById('addImagesBtn');
-const settingsBtn = document.getElementById('settingsBtn');
-const processBtn = document.getElementById('processBtn');
-const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-const settingsPanel = document.getElementById('settingsPanel');
-const overlay = document.getElementById('overlay');
-const status = document.getElementById('status');
+let fileInput = null;
+let imageGrid = null;
+let addImagesBtn = null;
+let settingsBtn = null;
+let processBtn = null;
+let closeSettingsBtn = null;
+let settingsPanel = null;
+let overlay = null;
+let status = null;
+let importZipBtn = null;
+let zipInput = null;
+let exportZipBtn = null;
 
 // 設定
 const LINE_STICKER_COUNTS = [8, 16, 24, 32, 40];
@@ -25,24 +28,153 @@ window.maxImageSize = { width: 370, height: 320 };
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
+    // 初始化 DOM 元素
+    fileInput = document.getElementById('fileInput');
+    imageGrid = document.getElementById('imageGrid');
+    addImagesBtn = document.getElementById('addImagesBtn');
+    settingsBtn = document.getElementById('settingsBtn');
+    processBtn = document.getElementById('processBtn');
+    closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    settingsPanel = document.getElementById('settingsPanel');
+    overlay = document.getElementById('overlay');
+    status = document.getElementById('status');
+    importZipBtn = document.getElementById('importZipBtn');
+    zipInput = document.getElementById('zipInput');
+    exportZipBtn = document.getElementById('exportZipBtn');
+
     // 初始化網格
     generateGridCells(DEFAULT_GRID_SIZE);
     setupDropzones();
     setupDragDrop();
 
     // 設定事件監聽器
-    addImagesBtn.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', handleFileSelect);
-    processBtn.addEventListener('click', processImages);
-    settingsBtn.addEventListener('click', toggleSettings);
-    closeSettingsBtn.addEventListener('click', toggleSettings);
-    overlay.addEventListener('click', toggleSettings);
+    if (addImagesBtn) {
+        addImagesBtn.addEventListener('click', () => fileInput && fileInput.click());
+    }
+    if (fileInput) {
+        fileInput.addEventListener('change', handleFileSelect);
+    }
+    if (processBtn) {
+        processBtn.addEventListener('click', processImages);
+    }
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', toggleSettings);
+    }
+    if (closeSettingsBtn) {
+        closeSettingsBtn.addEventListener('click', toggleSettings);
+    }
+    if (overlay) {
+        overlay.addEventListener('click', toggleSettings);
+    }
 
     // 設定格子數量選擇器
     const gridSizeSelector = document.getElementById('gridSizeSelector');
     if (gridSizeSelector) {
         gridSizeSelector.addEventListener('change', (e) => {
             changeGridSize(parseInt(e.target.value));
+        });
+    }
+
+    // 設定 ZIP 相關功能
+    if (importZipBtn && zipInput) {
+        importZipBtn.addEventListener('click', () => {
+            zipInput.click();
+        });
+
+        zipInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            try {
+                showStatus('正在處理壓縮檔...', 'info');
+
+                // 讀取壓縮檔
+                const zip = await JSZip.loadAsync(file);
+                const imageFiles = [];
+
+                // 收集所有圖片檔案
+                for (const [filename, zipEntry] of Object.entries(zip.files)) {
+                    if (!zipEntry.dir && /\.(png|jpe?g)$/i.test(filename)) {
+                        const blob = await zipEntry.async('blob');
+                        imageFiles.push({
+                            name: filename,
+                            blob: blob
+                        });
+                    }
+                }
+
+                // 依照檔名排序
+                imageFiles.sort((a, b) => a.name.localeCompare(b.name));
+
+                // 處理圖片
+                for (let i = 0; i < imageFiles.length; i++) {
+                    const img = await createImageFromBlob(imageFiles[i].blob);
+                    const resizedImage = await resizeImage(img, 240, 240);
+
+                    // 更新網格
+                    if (i === 0) {
+                        updateCellImage('main', 0, resizedImage);
+                    } else if (i === 1) {
+                        const tabImage = await resizeImage(img, 96, 74);
+                        updateCellImage('tab', 0, tabImage);
+                    } else {
+                        const index = i - 2;
+                        if (index < gridSize) {
+                            updateCellImage('grid', index, resizedImage);
+                        }
+                    }
+                }
+
+                showStatus('壓縮檔匯入完成！', 'success');
+                updateDraggableImages();
+            } catch (error) {
+                console.error('匯入壓縮檔時發生錯誤：', error);
+                showStatus('匯入壓縮檔時發生錯誤', 'error');
+            }
+        });
+    }
+
+    if (exportZipBtn) {
+        exportZipBtn.addEventListener('click', async () => {
+            try {
+                showStatus('正在產生壓縮檔...', 'info');
+
+                const zip = new JSZip();
+
+                // 添加主圖片
+                const mainCell = document.querySelector('.cell-inner[data-type="main"] img');
+                if (mainCell) {
+                    const mainBlob = await fetch(mainCell.src).then(r => r.blob());
+                    zip.file('main.png', mainBlob);
+                }
+
+                // 添加標籤圖片
+                const tabCell = document.querySelector('.cell-inner[data-type="tab"] img');
+                if (tabCell) {
+                    const tabBlob = await fetch(tabCell.src).then(r => r.blob());
+                    zip.file('tab.png', tabBlob);
+                }
+
+                // 添加一般貼圖
+                const gridCells = document.querySelectorAll('.cell-inner[data-type="grid"] img');
+                let index = 1;
+                for (const cell of gridCells) {
+                    if (cell) {
+                        const blob = await fetch(cell.src).then(r => r.blob());
+                        zip.file(`sticker_${String(index).padStart(2, '0')}.png`, blob);
+                        index++;
+                    }
+                }
+
+                // 產生並下載壓縮檔
+                const content = await zip.generateAsync({type: 'blob'});
+                saveAs(content, 'line_stickers.zip');
+
+                showStatus('壓縮檔已準備完成！', 'success');
+            } catch (error) {
+                console.error('產生壓縮檔時發生錯誤：', error);
+                showStatus('產生壓縮檔時發生錯誤', 'error');
+            }
         });
     }
 });
@@ -930,111 +1062,6 @@ async function updateMainImage(file) {
         console.error('更新主圖片時發生錯誤：', error);
     }
 }
-
-// 匯入壓縮檔功能
-const importZipBtn = document.getElementById('importZipBtn');
-const zipInput = document.getElementById('zipInput');
-
-importZipBtn.addEventListener('click', () => {
-    zipInput.click();
-});
-
-zipInput.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    try {
-        showStatus('正在處理壓縮檔...', 'info');
-
-        // 讀取壓縮檔
-        const zip = await JSZip.loadAsync(file);
-        const imageFiles = [];
-
-        // 收集所有圖片檔案
-        for (const [filename, zipEntry] of Object.entries(zip.files)) {
-            if (!zipEntry.dir && /\.(png|jpe?g)$/i.test(filename)) {
-                const blob = await zipEntry.async('blob');
-                imageFiles.push({
-                    name: filename,
-                    blob: blob
-                });
-            }
-        }
-
-        // 依照檔名排序
-        imageFiles.sort((a, b) => a.name.localeCompare(b.name));
-
-        // 處理圖片
-        for (let i = 0; i < imageFiles.length; i++) {
-            const img = await createImageFromBlob(imageFiles[i].blob);
-            const resizedImage = await resizeImage(img, 240, 240);
-
-            // 更新網格
-            if (i === 0) {
-                updateCellImage('main', 0, resizedImage);
-            } else if (i === 1) {
-                const tabImage = await resizeImage(img, 96, 74);
-                updateCellImage('tab', 0, tabImage);
-            } else {
-                const index = i - 2;
-                if (index < gridSize) {
-                    updateCellImage('grid', index, resizedImage);
-                }
-            }
-        }
-
-        showStatus('壓縮檔匯入完成！', 'success');
-        updateDraggableImages();
-    } catch (error) {
-        console.error('匯入壓縮檔時發生錯誤：', error);
-        showStatus('匯入壓縮檔時發生錯誤', 'error');
-    }
-});
-
-// 匯出壓縮檔功能
-const exportZipBtn = document.getElementById('exportZipBtn');
-
-exportZipBtn.addEventListener('click', async () => {
-    try {
-        showStatus('正在產生壓縮檔...', 'info');
-
-        const zip = new JSZip();
-
-        // 添加主圖片
-        const mainCell = document.querySelector('.cell-inner[data-type="main"] img');
-        if (mainCell) {
-            const mainBlob = await fetch(mainCell.src).then(r => r.blob());
-            zip.file('main.png', mainBlob);
-        }
-
-        // 添加標籤圖片
-        const tabCell = document.querySelector('.cell-inner[data-type="tab"] img');
-        if (tabCell) {
-            const tabBlob = await fetch(tabCell.src).then(r => r.blob());
-            zip.file('tab.png', tabBlob);
-        }
-
-        // 添加一般貼圖
-        const gridCells = document.querySelectorAll('.cell-inner[data-type="grid"] img');
-        let index = 1;
-        for (const cell of gridCells) {
-            if (cell) {
-                const blob = await fetch(cell.src).then(r => r.blob());
-                zip.file(`sticker_${String(index).padStart(2, '0')}.png`, blob);
-                index++;
-            }
-        }
-
-        // 產生並下載壓縮檔
-        const content = await zip.generateAsync({type: 'blob'});
-        saveAs(content, 'line_stickers.zip');
-
-        showStatus('壓縮檔已準備完成！', 'success');
-    } catch (error) {
-        console.error('產生壓縮檔時發生錯誤：', error);
-        showStatus('產生壓縮檔時發生錯誤', 'error');
-    }
-});
 
 // 輔助函數：從 Blob 建立圖片
 async function createImageFromBlob(blob) {

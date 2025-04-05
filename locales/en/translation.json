@@ -1,7 +1,7 @@
 {
-    "title": "LINE Sticker Creator",
+    "title": "LINE Sticker Creation Tool",
     "intro": {
-        "description": "LINE Sticker Creator is a web application that helps you quickly create sticker packs that meet LINE specifications. With an intuitive drag-and-drop interface and automatic resizing features, making stickers becomes simple and fun."
+        "description": "LINE Sticker Creation Tool is a web application that helps you quickly create sticker packs that meet LINE specifications. With an intuitive drag-and-drop interface and automatic adjustment features, making stickers becomes simple and fun. Supports one-click ZIP download and quick ZIP import for uploading all images in less than a minute."
     },
     "cards": {
         "official": {
@@ -10,41 +10,40 @@
             "market": "LINE Creators Market"
         },
         "features": {
-            "title": "Features",
-            "dragDrop": "Drag & Drop Interface",
-            "autoResize": "Auto Image Resizing",
+            "title": "Tool Features",
+            "dragDrop": "Intuitive Drag & Drop Interface",
+            "autoResize": "Automatic Image Resizing",
             "batchProcess": "Batch Processing",
-            "preview": "Real-time Preview"
+            "preview": "Real-time Preview",
+            "quickName": "One-click Quick Naming and File Size Adjustment",
+            "quickUpload": "One-click Download and LINE Sticker Settings Upload"
         },
         "specs": {
             "title": "Image Specifications",
-            "main": "Main Sticker",
-            "tab": "Tab Image",
-            "format": "File Format",
-            "mainSize": "240 × 240 px",
-            "tabSize": "96 × 74 px",
-            "formatType": "PNG"
+            "main": "Main Image: 240 × 240 pixels",
+            "tab": "Tab Image: 96 × 74 pixels",
+            "format": "Supported Format: PNG (transparent background recommended)"
         },
         "notes": {
             "title": "Important Notes",
-            "transparency": "Transparent Background Recommended",
-            "fileSize": "File Size Limit: 1MB",
-            "batchUpload": "Batch Upload Supported",
-            "autoSave": "Auto Progress Save"
+            "transparency": "PNG with transparent background recommended",
+            "fileSize": "Each file size should not exceed 1MB",
+            "batchUpload": "Supports batch upload and processing",
+            "autoSave": "Auto-save feature"
         }
     },
     "buttons": {
-        "selectImage": "Select Images",
+        "selectImage": "Select Image",
         "importZip": "Import ZIP",
-        "exportZip": "Download ZIP",
+        "exportZip": "Export ZIP",
         "settings": "Settings",
-        "generate": "Generate Stickers"
+        "generate": "Generate"
     },
     "dropzone": {
         "main": "Main Image",
         "tab": "Tab Image",
         "sticker": "Sticker",
-        "dropHere": "Drop Here"
+        "dropHere": "Drop Image Here"
     },
     "status": {
         "processing": "Processing...",
@@ -58,21 +57,25 @@
     "settings": {
         "title": "Settings",
         "gridSize": {
-            "label": "Number of Sticker Cells:",
+            "label": "Grid Size",
             "options": {
-                "8": "8 Stickers",
-                "16": "16 Stickers",
-                "24": "24 Stickers",
-                "32": "32 Stickers",
-                "40": "40 Stickers"
+                "4x4": "4 × 4 (16 items)",
+                "4x5": "4 × 5 (20 items)",
+                "4x6": "4 × 6 (24 items)",
+                "5x4": "5 × 4 (20 items)",
+                "5x5": "5 × 5 (25 items)",
+                "5x6": "5 × 6 (30 items)",
+                "6x4": "6 × 4 (24 items)",
+                "6x5": "6 × 5 (30 items)",
+                "6x6": "6 × 6 (36 items)"
             }
         },
         "info": {
-            "title": "Default Information",
-            "mainSize": "Main Image Size: 240 × 240 pixels",
-            "tabSize": "Tab Image Size: 96 × 74 pixels",
-            "count": "Standard Sticker Count: 8, 16, 24, 32 or 40",
-            "ratio": "All images will maintain original aspect ratio"
+            "title": "Information",
+            "mainSize": "Main Image Size: 240 × 240",
+            "tabSize": "Tab Image Size: 96 × 74",
+            "count": "Sticker Count: 16-40",
+            "ratio": "Image Ratio: 1:1"
         }
     }
 }
