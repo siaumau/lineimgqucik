@@ -1,0 +1,78 @@
+{
+    "title": "LINE Sticker Creator",
+    "intro": {
+        "description": "LINE Sticker Creator is a web application that helps you quickly create sticker packs that meet LINE specifications. With an intuitive drag-and-drop interface and automatic resizing features, making stickers becomes simple and fun."
+    },
+    "cards": {
+        "official": {
+            "title": "Official Resources",
+            "guide": "LINE Sticker Creation Guide",
+            "market": "LINE Creators Market"
+        },
+        "features": {
+            "title": "Features",
+            "dragDrop": "Drag & Drop Interface",
+            "autoResize": "Auto Image Resizing",
+            "batchProcess": "Batch Processing",
+            "preview": "Real-time Preview"
+        },
+        "specs": {
+            "title": "Image Specifications",
+            "main": "Main Sticker",
+            "tab": "Tab Image",
+            "format": "File Format",
+            "mainSize": "240 × 240 px",
+            "tabSize": "96 × 74 px",
+            "formatType": "PNG"
+        },
+        "notes": {
+            "title": "Important Notes",
+            "transparency": "Transparent Background Recommended",
+            "fileSize": "File Size Limit: 1MB",
+            "batchUpload": "Batch Upload Supported",
+            "autoSave": "Auto Progress Save"
+        }
+    },
+    "buttons": {
+        "selectImage": "Select Images",
+        "importZip": "Import ZIP",
+        "exportZip": "Download ZIP",
+        "settings": "Settings",
+        "generate": "Generate Stickers"
+    },
+    "dropzone": {
+        "main": "Main Image",
+        "tab": "Tab Image",
+        "sticker": "Sticker",
+        "dropHere": "Drop Here"
+    },
+    "status": {
+        "processing": "Processing...",
+        "success": "Success",
+        "error": "Error",
+        "importComplete": "ZIP import completed!",
+        "exportComplete": "ZIP file is ready!",
+        "importError": "Error importing ZIP file",
+        "exportError": "Error generating ZIP file"
+    },
+    "settings": {
+        "title": "Settings",
+        "gridSize": {
+            "label": "Number of Sticker Cells:",
+            "options": {
+                "8": "8 Stickers",
+                "16": "16 Stickers",
+                "24": "24 Stickers",
+                "32": "32 Stickers",
+                "40": "40 Stickers"
+            }
+        },
+        "info": {
+            "title": "Default Information",
+            "mainSize": "Main Image Size: 240 × 240 pixels",
+            "tabSize": "Tab Image Size: 96 × 74 pixels",
+            "count": "Standard Sticker Count: 8, 16, 24, 32 or 40",
+            "ratio": "All images will maintain original aspect ratio"
+        }
+    }
+}

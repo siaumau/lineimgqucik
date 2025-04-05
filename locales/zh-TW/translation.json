@@ -1,0 +1,78 @@
+{
+    "title": "LINE貼圖製作工具",
+    "intro": {
+        "description": "LINE 貼圖製作工具是一個網頁應用程式，幫助您快速製作符合 LINE 規格的貼圖包。透過直覺的拖放介面和自動調整功能，讓貼圖製作變得簡單有趣。"
+    },
+    "cards": {
+        "official": {
+            "title": "官方資源",
+            "guide": "LINE 貼圖製作指南",
+            "market": "LINE Creators Market"
+        },
+        "features": {
+            "title": "工具特色",
+            "dragDrop": "拖放式操作介面",
+            "autoResize": "自動調整圖片尺寸",
+            "batchProcess": "批次處理功能",
+            "preview": "即時預覽效果"
+        },
+        "specs": {
+            "title": "圖片規格",
+            "main": "主要貼圖",
+            "tab": "標籤貼圖",
+            "format": "檔案格式",
+            "mainSize": "240 × 240 px",
+            "tabSize": "96 × 74 px",
+            "formatType": "PNG"
+        },
+        "notes": {
+            "title": "注意事項",
+            "transparency": "建議使用透明背景",
+            "fileSize": "檔案大小限制 1MB",
+            "batchUpload": "支援批次上傳",
+            "autoSave": "自動保存進度"
+        }
+    },
+    "buttons": {
+        "selectImage": "選擇圖片",
+        "importZip": "匯入壓縮檔",
+        "exportZip": "下載壓縮檔",
+        "settings": "設定",
+        "generate": "產生貼圖"
+    },
+    "dropzone": {
+        "main": "主圖片",
+        "tab": "標籤圖片",
+        "sticker": "貼圖",
+        "dropHere": "拖放至此"
+    },
+    "status": {
+        "processing": "處理中...",
+        "success": "成功",
+        "error": "錯誤",
+        "importComplete": "壓縮檔匯入完成！",
+        "exportComplete": "壓縮檔已準備完成！",
+        "importError": "匯入壓縮檔時發生錯誤",
+        "exportError": "產生壓縮檔時發生錯誤"
+    },
+    "settings": {
+        "title": "設定",
+        "gridSize": {
+            "label": "貼圖格子數量：",
+            "options": {
+                "8": "8 張",
+                "16": "16 張",
+                "24": "24 張",
+                "32": "32 張",
+                "40": "40 張"
+            }
+        },
+        "info": {
+            "title": "預設值資訊",
+            "mainSize": "主圖片尺寸：240 × 240 像素",
+            "tabSize": "標籤圖片尺寸：96 × 74 像素",
+            "count": "貼圖數量標準：8, 16, 24, 32 或 40 張",
+            "ratio": "所有圖片將保持原始比例"
+        }
+    }
+}

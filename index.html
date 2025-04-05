@@ -9,36 +9,86 @@
     <body>
         <div class="app-container">
             <header>
-                <h1>LINE貼圖製作工具</h1>
+                <div class="header-top">
+                    <h1>LINE貼圖製作工具</h1>
+                    <div class="language-switcher">
+                        <button class="language-switch" data-lang="zh-TW">繁體中文</button>
+                        <button class="language-switch" data-lang="en">English</button>
+                    </div>
+                </div>
                 <div class="header-description">
-                    <p>這是一個網頁版的 LINE 貼圖製作工具，幫助您快速製作符合 LINE 規格的貼圖包。本工具可以自動調整圖片尺寸、支援拖放操作，並自動產生符合 LINE 規格的貼圖包。</p>
-                    <div class="official-links">
-                        <p>🔍 製作 LINE 貼圖前，請詳閱以下官方資訊：</p>
-                        <a href="https://creator.line.me/zh-hant/guideline/sticker/" target="_blank" class="official-link">
-                            <span>📘 LINE 貼圖製作官方說明</span>
-                        </a>
-                        <span class="link-separator">|</span>
-                        <a href="https://creator.line.me/" target="_blank" class="official-link">
-                            <span>🏪 LINE Creators Market</span>
-                        </a>
+                    <div class="intro-section">
+                        <p class="intro-text">LINE 貼圖製作工具是一個網頁應用程式，幫助您快速製作符合 LINE 規格的貼圖包。透過直覺的拖放介面和自動調整功能，讓貼圖製作變得簡單有趣。<span class="highlight-feature">支援一鍵下載ZIP壓縮包與快速一鍵匯入ZIP整個上架圖片不用一分鐘</span>。</p>
                     </div>
-                    <div class="tool-features">
-                        <p>💡 本工具特色：</p>
-                        <ul>
-                            <li>一鍵自動調整圖片尺寸（主圖片 240×240、標籤圖片 96×74）</li>
-                            <li>支援批量上傳和拖放操作</li>
-                            <li>自動產生符合規格的 ZIP 檔案</li>
-                            <li>無需安裝，開啟網頁即可使用</li>
-                        </ul>
-                    </div>
-                    <div class="important-notes">
-                        <p>⚠️ 注意事項：</p>
-                        <ul>
-                            <li>建議使用 PNG 格式圖片</li>
-                            <li>圖片需去背透明處理</li>
-                            <li>解析度需 72dpi 以上</li>
-                            <li>單一圖片須小於 1MB</li>
-                        </ul>
+
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="card-header">
+                                <span class="icon">📚</span>
+                                <h3>官方資源</h3>
+                            </div>
+                            <div class="card-content">
+                                <a href="https://creators.line.me/zh-hant/guidelines/stickers" class="official-link">
+                                    <span class="icon">📋</span>
+                                    LINE 貼圖製作指南
+                                </a>
+                                <a href="https://creator.line.me/" class="official-link">
+                                    <span class="icon">🏪</span>
+                                    LINE Creators Market
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="card-header">
+                                <span class="icon">✨</span>
+                                <h3>工具特色</h3>
+                            </div>
+                            <div class="card-content tool-features">
+                                <ul>
+                                    <li><span class="icon">🖱️</span>拖放式操作介面</li>
+                                    <li><span class="icon">📏</span>自動調整圖片尺寸</li>
+                                    <li><span class="icon">📦</span>批次處理功能</li>
+                                    <li><span class="icon">👁️</span>即時預覽效果</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="card-header">
+                                <span class="icon">📐</span>
+                                <h3>圖片規格</h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="spec-item">
+                                    <span class="spec-label">主要貼圖</span>
+                                    <span class="spec-value">240 × 240 px</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">標籤貼圖</span>
+                                    <span class="spec-value">96 × 74 px</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">檔案格式</span>
+                                    <span class="spec-value">PNG</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="card-header">
+                                <span class="icon">⚠️</span>
+                                <h3>注意事項</h3>
+                            </div>
+                            <div class="card-content important-notes">
+                                <ul>
+                                    <li><span class="icon">🎨</span>建議使用透明背景</li>
+                                    <li><span class="icon">📊</span>檔案大小限制 1MB</li>
+                                    <li><span class="icon">🖼️</span>支援批次上傳</li>
+                                    <li><span class="icon">💾</span>自動保存進度</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -61,30 +111,52 @@
                         <input type="file" id="fileInput" multiple
                             accept="image/*" style="display: none;">
 
-                        <button id="settingsBtn" class="btn secondary">
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="3"></circle>
-                                <path
-                                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        <!-- <button id="importZipBtn" class="btn secondary">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
                             </svg>
-                            設定
+                            匯入壓縮檔
                         </button>
+                        <input type="file" id="zipInput" accept=".zip" style="display: none;">
 
-                        <button id="processBtn" class="btn accent" disabled>
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <path
-                                    d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <button id="exportZipBtn" class="btn secondary">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                 <polyline points="7 10 12 15 17 10"></polyline>
                                 <line x1="12" y1="15" x2="12" y2="3"></line>
                             </svg>
-                            產生貼圖
-                        </button>
+                            下載壓縮檔
+                        </button> -->
+
+<div style="display: flex; gap: 10px;">
+    <span style="display: inline-block;cursor: pointer;" id="settingsBtn" class="btn secondary">
+        <svg xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        設定
+    </span style="d">
+    <span style="d" id="processBtn" class="btn accent" disabled>
+        <svg xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+                d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        產生貼圖
+    </span style="d">
+</div>
+
+
                     </div>
 
                     <div class="image-grid" id="imageGrid">
@@ -229,12 +301,14 @@
             </div>
         </div>
         <script src="main.js"></script>
-        <script
-            src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-        <script
-            src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-        <script
-            src="https://cdnjs.cloudflare.com/ajax/libs/interact.js/1.10.11/interact.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/interact.js/1.10.11/interact.min.js"></script>
 
+        <!-- 多國語言支援 -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/22.5.0/i18next.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next-http-backend/2.2.1/i18nextHttpBackend.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next-browser-languagedetector/7.1.0/i18nextBrowserLanguageDetector.min.js"></script>
+        <script src="i18n.js"></script>
     </body>
 </html>

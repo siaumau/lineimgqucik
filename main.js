@@ -930,3 +930,144 @@ async function updateMainImage(file) {
         console.error('更新主圖片時發生錯誤：', error);
     }
 }
+
+// 匯入壓縮檔功能
+const importZipBtn = document.getElementById('importZipBtn');
+const zipInput = document.getElementById('zipInput');
+
+importZipBtn.addEventListener('click', () => {
+    zipInput.click();
+});
+
+zipInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+        showStatus('正在處理壓縮檔...', 'info');
+
+        // 讀取壓縮檔
+        const zip = await JSZip.loadAsync(file);
+        const imageFiles = [];
+
+        // 收集所有圖片檔案
+        for (const [filename, zipEntry] of Object.entries(zip.files)) {
+            if (!zipEntry.dir && /\.(png|jpe?g)$/i.test(filename)) {
+                const blob = await zipEntry.async('blob');
+                imageFiles.push({
+                    name: filename,
+                    blob: blob
+                });
+            }
+        }
+
+        // 依照檔名排序
+        imageFiles.sort((a, b) => a.name.localeCompare(b.name));
+
+        // 處理圖片
+        for (let i = 0; i < imageFiles.length; i++) {
+            const img = await createImageFromBlob(imageFiles[i].blob);
+            const resizedImage = await resizeImage(img, 240, 240);
+
+            // 更新網格
+            if (i === 0) {
+                updateCellImage('main', 0, resizedImage);
+            } else if (i === 1) {
+                const tabImage = await resizeImage(img, 96, 74);
+                updateCellImage('tab', 0, tabImage);
+            } else {
+                const index = i - 2;
+                if (index < gridSize) {
+                    updateCellImage('grid', index, resizedImage);
+                }
+            }
+        }
+
+        showStatus('壓縮檔匯入完成！', 'success');
+        updateDraggableImages();
+    } catch (error) {
+        console.error('匯入壓縮檔時發生錯誤：', error);
+        showStatus('匯入壓縮檔時發生錯誤', 'error');
+    }
+});
+
+// 匯出壓縮檔功能
+const exportZipBtn = document.getElementById('exportZipBtn');
+
+exportZipBtn.addEventListener('click', async () => {
+    try {
+        showStatus('正在產生壓縮檔...', 'info');
+
+        const zip = new JSZip();
+
+        // 添加主圖片
+        const mainCell = document.querySelector('.cell-inner[data-type="main"] img');
+        if (mainCell) {
+            const mainBlob = await fetch(mainCell.src).then(r => r.blob());
+            zip.file('main.png', mainBlob);
+        }
+
+        // 添加標籤圖片
+        const tabCell = document.querySelector('.cell-inner[data-type="tab"] img');
+        if (tabCell) {
+            const tabBlob = await fetch(tabCell.src).then(r => r.blob());
+            zip.file('tab.png', tabBlob);
+        }
+
+        // 添加一般貼圖
+        const gridCells = document.querySelectorAll('.cell-inner[data-type="grid"] img');
+        let index = 1;
+        for (const cell of gridCells) {
+            if (cell) {
+                const blob = await fetch(cell.src).then(r => r.blob());
+                zip.file(`sticker_${String(index).padStart(2, '0')}.png`, blob);
+                index++;
+            }
+        }
+
+        // 產生並下載壓縮檔
+        const content = await zip.generateAsync({type: 'blob'});
+        saveAs(content, 'line_stickers.zip');
+
+        showStatus('壓縮檔已準備完成！', 'success');
+    } catch (error) {
+        console.error('產生壓縮檔時發生錯誤：', error);
+        showStatus('產生壓縮檔時發生錯誤', 'error');
+    }
+});
+
+// 輔助函數：從 Blob 建立圖片
+async function createImageFromBlob(blob) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = URL.createObjectURL(blob);
+    });
+}
+
+// 輔助函數：調整圖片大小
+async function resizeImage(img, targetWidth, targetHeight) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // 計算縮放比例
+    const scale = Math.min(targetWidth / img.width, targetHeight / img.height);
+    const width = img.width * scale;
+    const height = img.height * scale;
+
+    // 設定 canvas 大小
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+
+    // 清空 canvas
+    ctx.clearRect(0, 0, targetWidth, targetHeight);
+
+    // 在中心繪製圖片
+    const x = (targetWidth - width) / 2;
+    const y = (targetHeight - height) / 2;
+    ctx.drawImage(img, x, y, width, height);
+
+    // 轉換為 PNG 格式
+    return canvas.toDataURL('image/png');
+}
