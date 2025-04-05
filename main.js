@@ -142,22 +142,37 @@ function setupDropzones() {
 
                 if (sourceImageIndex !== -1 && targetImageIndex !== -1) {
                     console.log('開始交換圖片');
-                    // 交換圖片
-                    const tempDataUrl = imageFiles[sourceImageIndex].dataUrl;
-                    const tempFile = imageFiles[sourceImageIndex].file;
 
-                    imageFiles[sourceImageIndex].dataUrl = imageFiles[targetImageIndex].dataUrl;
-                    imageFiles[sourceImageIndex].file = imageFiles[targetImageIndex].file;
+                    // 備份原始圖片數據
+                    const sourceImage = {...imageFiles[sourceImageIndex]};
+                    const targetImage = {...imageFiles[targetImageIndex]};
 
-                    imageFiles[targetImageIndex].dataUrl = tempDataUrl;
-                    imageFiles[targetImageIndex].file = tempFile;
+                    // 交換 cellIndex
+                    sourceImage.cellIndex = targetCellIndex;
+                    targetImage.cellIndex = sourceCellIndex;
+
+                    // 更新圖片數組
+                    imageFiles[sourceImageIndex] = sourceImage;
+                    imageFiles[targetImageIndex] = targetImage;
+
+                    // 清除原有圖片
+                    clearCellImage('regular', sourceCellIndex);
+                    clearCellImage('regular', targetCellIndex);
 
                     // 更新顯示
-                    updateCellImage('grid', imageFiles[sourceImageIndex].dataUrl, sourceCellIndex);
-                    updateCellImage('grid', imageFiles[targetImageIndex].dataUrl, targetCellIndex);
+                    updateCellImage('regular', sourceImage, sourceImageIndex);
+                    updateCellImage('regular', targetImage, targetImageIndex);
 
                     showStatus(`已交換貼圖 ${String(sourceCellIndex).padStart(2, '0')} 和貼圖 ${String(targetCellIndex).padStart(2, '0')}`, 'success');
                     console.log('圖片交換完成');
+
+                    // 重新檢查可拖曳的圖片數量
+                    console.log('重新檢查可拖曳圖片數量');
+                    const draggableImages = document.querySelectorAll('.cell-image');
+                    console.log('目前可拖曳的圖片數量:', draggableImages.length);
+
+                    // 重新設置拖曳功能
+                    setupDragDrop();
                 }
             }
         });
@@ -258,12 +273,6 @@ function handleFileSelect(e) {
 
         generateGridCells(targetCount);
         setupDropzones();
-
-        // 更新格子大小選擇器
-        const gridSizeSelector = document.getElementById('gridSizeSelector');
-        if (gridSizeSelector) {
-            gridSizeSelector.value = targetCount;
-        }
     }
 
     // 自動分配圖片到空格子
@@ -284,6 +293,11 @@ function handleFileSelect(e) {
 
     // 清空輸入
     fileInput.value = '';
+
+    // 重新設置拖曳功能
+    setTimeout(() => {
+        setupDragDrop();
+    }, 100);
 }
 
 // 處理拖放的文件
@@ -335,6 +349,14 @@ function handleDroppedFile(file, cellType, cellIndex) {
 
         // 更新按鈕狀態
         updateButtonStates();
+
+        // 重新檢查可拖曳的圖片數量
+        console.log('重新檢查可拖曳圖片數量');
+        const draggableImages = document.querySelectorAll('.cell-image');
+        console.log('目前可拖曳的圖片數量:', draggableImages.length);
+
+        // 重新設置拖曳功能
+        setupDragDrop();
     };
 
     reader.readAsDataURL(file);
@@ -547,9 +569,12 @@ function updateCellImage(cellType, imageData, imageIndex) {
         selector = `.grid-cell:not(.special-cell) .cell-inner[data-index="${imageData.cellIndex}"]`;
     }
 
+    console.log('更新圖片選擇器:', selector);
+    console.log('更新圖片數據:', imageData);
+
     const cellInner = document.querySelector(selector);
     if (!cellInner) {
-        console.error(`找不到單元格: ${selector}`);
+        console.error(`找不到單元格: ${selector}, cellType=${cellType}, cellIndex=${imageData.cellIndex}`);
         return;
     }
 
@@ -565,7 +590,7 @@ function updateCellImage(cellType, imageData, imageIndex) {
     img.className = 'cell-image';
     img.setAttribute('draggable', 'true');
     img.dataset.index = imageIndex;
-    img.dataset.cellIndex = imageData.cellIndex;  // 添加單元格索引
+    img.dataset.cellIndex = imageData.cellIndex;
 
     cellInner.appendChild(img);
     cellInner.classList.add('has-image');
@@ -576,7 +601,12 @@ function updateCellImage(cellType, imageData, imageIndex) {
         placeholder.style.display = 'none';
     }
 
-    console.log(`更新圖片: 類型=${cellType}, 索引=${imageIndex}, 單元格索引=${imageData.cellIndex}`);
+    console.log(`更新圖片完成: 類型=${cellType}, 索引=${imageIndex}, 單元格索引=${imageData.cellIndex}`);
+
+    // 重新設置拖曳功能
+    setTimeout(() => {
+        setupDragDrop();
+    }, 100);
 }
 
 // 清除單元格圖片
