@@ -19,6 +19,10 @@ const status = document.getElementById('status');
 const LINE_STICKER_COUNTS = [8, 16, 24, 32, 40];
 const DEFAULT_GRID_SIZE = 16 // 改為16張，預設顯示最大數量
 
+// 初始化全局設定
+window.mainImageSize = { width: 240, height: 240 };
+window.maxImageSize = { width: 370, height: 320 };
+
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
     // 初始化網格
@@ -727,7 +731,7 @@ function showStatus(message, type) {
 }
 
 // 調整圖片大小
-async function resizeImage(dataUrl, option = 'max', maxWidth = 240, maxHeight = 240) {
+async function resizeImage(dataUrl, option = 'max') {
     return new Promise((resolve) => {
         const img = new Image();
         img.onload = () => {
@@ -737,62 +741,67 @@ async function resizeImage(dataUrl, option = 'max', maxWidth = 240, maxHeight = 
             let dy = 0;
             let dWidth, dHeight;
 
-            // 創建 Canvas
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
 
-            // 根據選項調整大小
-            if (option === 'fixed' && maxWidth && maxHeight) {
-                // 固定尺寸但保持比例且置中
+            if (option === 'main') {
+                // 使用主圖片尺寸設定 (240x240)
+                const { width: maxWidth, height: maxHeight } = window.mainImageSize;
                 canvas.width = maxWidth;
                 canvas.height = maxHeight;
-
-                // 填充背景為透明
                 ctx.clearRect(0, 0, maxWidth, maxHeight);
 
-                // 計算縮放比例 (取最小值以適應容器)
                 const scale = Math.min(maxWidth / width, maxHeight / height);
-
-                // 計算新尺寸並確保是2的倍數
                 dWidth = Math.floor(width * scale);
                 dHeight = Math.floor(height * scale);
 
-                // 確保寬高都是2的倍數
                 dWidth = dWidth % 2 !== 0 ? dWidth - 1 : dWidth;
                 dHeight = dHeight % 2 !== 0 ? dHeight - 1 : dHeight;
 
-                // 計算置中的位置
                 dx = Math.floor((maxWidth - dWidth) / 2);
                 dy = Math.floor((maxHeight - dHeight) / 2);
 
-                // 繪製圖片
+                ctx.drawImage(img, dx, dy, dWidth, dHeight);
+            } else if (option === 'tab') {
+                // 標籤圖片固定尺寸 (96x74)
+                const tabWidth = 96;
+                const tabHeight = 74;
+                canvas.width = tabWidth;
+                canvas.height = tabHeight;
+                ctx.clearRect(0, 0, tabWidth, tabHeight);
+
+                const scale = Math.min(tabWidth / width, tabHeight / height);
+                dWidth = Math.floor(width * scale);
+                dHeight = Math.floor(height * scale);
+
+                dWidth = dWidth % 2 !== 0 ? dWidth - 1 : dWidth;
+                dHeight = dHeight % 2 !== 0 ? dHeight - 1 : dHeight;
+
+                dx = Math.floor((tabWidth - dWidth) / 2);
+                dy = Math.floor((tabHeight - dHeight) / 2);
+
                 ctx.drawImage(img, dx, dy, dWidth, dHeight);
             } else {
-                // 依最大尺寸調整
-                const maxSize = Math.max(maxWidth, maxHeight);
-                if (width > maxSize) {
-                    height = Math.floor((height * maxSize) / width);
-                    width = maxSize;
+                // 使用最大圖片尺寸設定
+                const { width: maxWidth, height: maxHeight } = window.maxImageSize;
+                if (width > maxWidth) {
+                    height = Math.floor((height * maxWidth) / width);
+                    width = maxWidth;
                 }
 
-                if (height > maxSize) {
-                    width = Math.floor((width * maxSize) / height);
-                    height = maxSize;
+                if (height > maxHeight) {
+                    width = Math.floor((width * maxHeight) / height);
+                    height = maxHeight;
                 }
 
-                // 確保寬高都是2的倍數
                 width = width % 2 !== 0 ? width - 1 : width;
                 height = height % 2 !== 0 ? height - 1 : height;
 
-                // 設置 Canvas 尺寸
                 canvas.width = width;
                 canvas.height = height;
-
-                // 繪製圖片
                 ctx.drawImage(img, 0, 0, width, height);
             }
 
-            // 轉換為 Blob
             canvas.toBlob((blob) => {
                 resolve(blob);
             }, 'image/png');
@@ -836,19 +845,17 @@ async function processImages() {
         // 創建 ZIP 檔案
         const zip = new JSZip();
 
-        // 處理主圖片
+        // 處理主圖片 (240x240)
         const mainImg = await resizeImage(
             imageFiles[mainImageIndex].dataUrl,
-            'fixed',
-            240, 240
+            'main'  // 使用 'main' 選項，會自動使用 mainImageSize 設定
         );
         zip.file('main.png', mainImg);
 
-        // 處理標籤圖片
+        // 處理標籤圖片 (96x74)
         const tabImg = await resizeImage(
             imageFiles[tabImageIndex].dataUrl,
-            'fixed',
-            96, 74
+            'tab'  // 新增 'tab' 選項處理
         );
         zip.file('tab.png', tabImg);
 
@@ -861,7 +868,7 @@ async function processImages() {
             const filename = String(i + 1).padStart(2, '0') + '.png';
 
             // 調整圖片大小
-            const resizedImg = await resizeImage(img.dataUrl);
+            const resizedImg = await resizeImage(img.dataUrl, 'max');
 
             // 添加到 ZIP
             zip.file(filename, resizedImg);
@@ -904,5 +911,22 @@ async function processImages() {
             </svg>
             產生貼圖
         `;
+    }
+}
+
+// 更新主圖片
+async function updateMainImage(file) {
+    try {
+        const dataUrl = await readFileAsDataURL(file);
+        const resizedBlob = await resizeImage(dataUrl, 'main');
+        const resizedDataUrl = await blobToDataURL(resizedBlob);
+
+        const mainCell = document.querySelector('.cell[data-type="main"]');
+        if (mainCell) {
+            updateCellImage('main', 0, resizedDataUrl);
+            window.mainImage = resizedDataUrl;
+        }
+    } catch (error) {
+        console.error('更新主圖片時發生錯誤：', error);
     }
 }
