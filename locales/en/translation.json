@@ -3,6 +3,10 @@
     "intro": {
         "description": "LINE Sticker Creation Tool is a web application that helps you quickly create sticker packs that meet LINE specifications. With an intuitive drag-and-drop interface and automatic adjustment features, making stickers becomes simple and fun. Supports one-click ZIP download and quick ZIP import for uploading all images in less than a minute."
     },
+    "stats": {
+        "today": "Today's Visits",
+        "total": "Total Visits"
+    },
     "cards": {
         "official": {
             "title": "Official Resources",
