@@ -24,7 +24,7 @@ const DEFAULT_GRID_SIZE = 16 // 改為16張，預設顯示最大數量
 
 // 初始化全局設定
 window.mainImageSize = { width: 240, height: 240 };
-window.maxImageSize = { width: 370, height: 320 };
+window.maxImageSize = { width: 320, height: 320 };
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
@@ -106,25 +106,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 依照檔名排序
                 imageFiles.sort((a, b) => a.name.localeCompare(b.name));
 
-                // 處理圖片
-                for (let i = 0; i < imageFiles.length; i++) {
-                    const img = await createImageFromBlob(imageFiles[i].blob);
-                    const resizedImage = await resizeImage(img, 240, 240);
+// 處理圖片
+// 修正 ZIP 匯入部分
+for (let i = 0; i < imageFiles.length; i++) {
+    const img = await createImageFromBlob(imageFiles[i].blob);
+    const resizedImageMain = await resizeImage(img, window.mainImageSize.width, window.mainImageSize.height);
+    const resizedImage = await resizeImage(img, window.maxImageSize.width, window.maxImageSize.height); // 使用320x320的尺寸
 
-                    // 更新網格
-                    if (i === 0) {
-                        updateCellImage('main', 0, resizedImage);
-                    } else if (i === 1) {
-                        const tabImage = await resizeImage(img, 96, 74);
-                        updateCellImage('tab', 0, tabImage);
-                    } else {
-                        const index = i - 2;
-                        if (index < gridSize) {
-                            updateCellImage('grid', index, resizedImage);
-                        }
-                    }
-                }
-
+    // 更新網格
+    if (i === 0) {
+        updateCellImage('main', 0, resizedImageMain);
+    } else if (i === 1) {
+        const tabImage = await resizeImage(img, 96, 74);
+        updateCellImage('tab', 0, tabImage);
+    } else {
+        const index = i - 2;
+        if (index < gridSize) {
+            updateCellImage('grid', index, resizedImage); // 這裡使用320x320尺寸的圖片
+        }
+    }
+}
                 showStatus('壓縮檔匯入完成！', 'success');
                 updateDraggableImages();
             } catch (error) {
@@ -134,49 +135,62 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (exportZipBtn) {
-        exportZipBtn.addEventListener('click', async () => {
-            try {
-                showStatus('正在產生壓縮檔...', 'info');
+// 修正 exportZipBtn 的事件處理
+if (exportZipBtn) {
+    exportZipBtn.addEventListener('click', async () => {
+        try {
+            showStatus('正在產生壓縮檔...', 'info');
 
-                const zip = new JSZip();
+            const zip = new JSZip();
 
-                // 添加主圖片
-                const mainCell = document.querySelector('.cell-inner[data-type="main"] img');
-                if (mainCell) {
-                    const mainBlob = await fetch(mainCell.src).then(r => r.blob());
-                    zip.file('main.png', mainBlob);
-                }
-
-                // 添加標籤圖片
-                const tabCell = document.querySelector('.cell-inner[data-type="tab"] img');
-                if (tabCell) {
-                    const tabBlob = await fetch(tabCell.src).then(r => r.blob());
-                    zip.file('tab.png', tabBlob);
-                }
-
-                // 添加一般貼圖
-                const gridCells = document.querySelectorAll('.cell-inner[data-type="grid"] img');
-                let index = 1;
-                for (const cell of gridCells) {
-                    if (cell) {
-                        const blob = await fetch(cell.src).then(r => r.blob());
-                        zip.file(`sticker_${String(index).padStart(2, '0')}.png`, blob);
-                        index++;
-                    }
-                }
-
-                // 產生並下載壓縮檔
-                const content = await zip.generateAsync({type: 'blob'});
-                saveAs(content, 'line_stickers.zip');
-
-                showStatus('壓縮檔已準備完成！', 'success');
-            } catch (error) {
-                console.error('產生壓縮檔時發生錯誤：', error);
-                showStatus('產生壓縮檔時發生錯誤', 'error');
+            // 添加主圖片
+            const mainCell = document.querySelector('.cell-inner[data-type="main"] img');
+            if (mainCell) {
+                const mainImg = new Image();
+                mainImg.src = mainCell.src;
+                await new Promise((resolve) => { mainImg.onload = resolve; });
+                const resizedMainImage = await resizeImage(mainImg, window.mainImageSize.width, window.mainImageSize.height);
+                const mainBlob = await fetch(resizedMainImage).then(r => r.blob());
+                zip.file('main.png', mainBlob);
             }
-        });
-    }
+
+            // 添加標籤圖片
+            const tabCell = document.querySelector('.cell-inner[data-type="tab"] img');
+            if (tabCell) {
+                const tabImg = new Image();
+                tabImg.src = tabCell.src;
+                await new Promise((resolve) => { tabImg.onload = resolve; });
+                const resizedTabImage = await resizeImage(tabImg, 96, 74);
+                const tabBlob = await fetch(resizedTabImage).then(r => r.blob());
+                zip.file('tab.png', tabBlob);
+            }
+
+            // 添加一般貼圖
+            const gridCells = document.querySelectorAll('.cell-inner[data-type="grid"] img');
+            let index = 1;
+            for (const cell of gridCells) {
+                if (cell) {
+                    const stickerImg = new Image();
+                    stickerImg.src = cell.src;
+                    await new Promise((resolve) => { stickerImg.onload = resolve; });
+                    const resizedImage = await resizeImage(stickerImg, window.maxImageSize.width, window.maxImageSize.height);
+                    const blob = await fetch(resizedImage).then(r => r.blob());
+                    zip.file(`sticker_${String(index).padStart(2, '0')}.png`, blob);
+                    index++;
+                }
+            }
+
+            // 產生並下載壓縮檔
+            const content = await zip.generateAsync({type: 'blob'});
+            saveAs(content, 'line_stickers.zip');
+
+            showStatus('壓縮檔已準備完成！', 'success');
+        } catch (error) {
+            console.error('產生壓縮檔時發生錯誤：', error);
+            showStatus('產生壓縮檔時發生錯誤', 'error');
+        }
+    });
+}
 });
 
 // 變更格子數量
@@ -921,6 +935,7 @@ async function resizeImage(imgElement, targetWidth, targetHeight) {
 }
 
 // 處理圖片並生成 ZIP
+// 修改 processImages 函數
 async function processImages() {
     try {
         showStatus('正在處理圖片...', 'info');
@@ -971,8 +986,8 @@ async function processImages() {
                         stickerImg.src = img.src;
                         await new Promise((resolve) => { stickerImg.onload = resolve; });
 
-                        // 調整大小
-                        const resizedImage = await resizeImage(stickerImg, 240, 240);
+                        // 調整大小 - 使用window.maxImageSize設定的320x320尺寸
+                        const resizedImage = await resizeImage(stickerImg, window.maxImageSize.width, window.maxImageSize.height);
                         const blob = await fetch(resizedImage).then(r => r.blob());
 
                         // 使用從 01 開始的編號
